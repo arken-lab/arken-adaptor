@@ -66,7 +66,7 @@ func (p *ProtocolAdaptorImpl) GetTransactionFilters() ([]universaladaptor.Transa
 func (p *ProtocolAdaptorImpl) ProcessTransaction(uniTx universaladaptor.Transaction) ([]universaladaptor.Event, error) {
 	tx, ok := uniTx.(terraadaptor.Transaction)
 	if !ok {
-		return nil, errors.New("interface incorrect")
+		return nil, errors.New("transaction interface is not correct")
 	}
 	events := []SwapEvent{}
 	for _, log := range tx.Logs {
@@ -175,19 +175,19 @@ func (p *ProtocolAdaptorImpl) ProcessTransaction(uniTx universaladaptor.Transact
 }
 
 func (p *ProtocolAdaptorImpl) GetLogFilters() ([]universaladaptor.LogFilter, error) {
-	return nil, errors.New("not implemented")
+	return []universaladaptor.LogFilter{}, nil
 }
 
 func (p *ProtocolAdaptorImpl) GetPollingContracts() ([]universaladaptor.ContractResponse, error) {
-	return nil, errors.New("not implemented")
+	return []universaladaptor.ContractResponse{}, nil
 }
 
 func (p *ProtocolAdaptorImpl) ProcessLog(log universaladaptor.Log) ([]universaladaptor.Event, error) {
-	return nil, errors.New("not implemented")
+	return []universaladaptor.Event{}, nil
 }
 
 func (p *ProtocolAdaptorImpl) ProcessPollingContractResponse(universaladaptor.ContractResponse) ([]universaladaptor.Event, error) {
-	return nil, errors.New("not implemented")
+	return []universaladaptor.Event{}, nil
 }
 
 func (p *ProtocolAdaptorImpl) isSwapEvent(event terraadaptor.TxEvent) bool {

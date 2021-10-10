@@ -2,7 +2,6 @@ package terraadaptor
 
 import (
 	"encoding/json"
-	"errors"
 	"net/http"
 
 	"github.com/arken-lab/arken-adaptor/universaladaptor"
@@ -101,9 +100,9 @@ func (c *ChainAdaptorImpl) GetLatestBlock() (universaladaptor.BlockNumber, error
 }
 
 func (c *ChainAdaptorImpl) GetLogs(fromBlock int64, toBlock int64, logFilters []universaladaptor.LogFilter) ([]universaladaptor.Log, error) {
-	return nil, errors.New("not implemented")
+	return []universaladaptor.Log{}, nil
 }
 
 func (c *ChainAdaptorImpl) QueryContract(contractQueryData interface{}) (universaladaptor.ContractResponse, error) {
-	return nil, errors.New("not implemented")
+	return nil, nil
 }
