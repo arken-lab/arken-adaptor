@@ -8,6 +8,10 @@ import (
 	"github.com/arken-lab/arken-adaptor/universaladaptor"
 )
 
+const (
+	CHAIN_NAME = "TERRA"
+)
+
 type ChainAdaptorImpl struct {
 	LCDUrl string
 }
@@ -21,16 +25,18 @@ type TransactionFilter struct {
 	ContractAddress string
 }
 
+type TxEvent struct {
+	Type       string `json:"type"`
+	Attributes []struct {
+		Key   string `json:"key"`
+		Value string `json:"value"`
+	} `json:"attributes"`
+}
+
 type Log struct {
-	MsgIndex int64  `json:"msg_index"`
-	Log      string `json:"log"`
-	Events   []struct {
-		Type       string `json:"type"`
-		Attributes []struct {
-			Key   string `json:"key"`
-			Value string `json:"value"`
-		} `json:"attributes"`
-	} `json:"events"`
+	MsgIndex int64     `json:"msg_index"`
+	Log      string    `json:"log"`
+	Events   []TxEvent `json:"events"`
 }
 
 type Transaction struct {

@@ -2,7 +2,32 @@ package universaladaptor
 
 import "errors"
 
-type TradeTx struct{}
+const (
+	TradeTxBuy  TradeTxSide = "BUY"
+	TradeTxSell TradeTxSide = "SELL"
+)
+
+type TradeTxToken struct {
+	Chain   string
+	Address string
+}
+
+type TradeTxSide string
+
+type TradeTx struct {
+	Token        TradeTxToken
+	TxHash       string
+	LogIndex     int64
+	Block        int64
+	LpAddress    string
+	AmountBase   float64
+	AmountUsd    float64
+	PriceBaseUsd float64
+	Side         TradeTxSide
+	Timestamp    int64
+	IsRemoved    bool
+	IsHistorical bool
+}
 
 func NewTradeTxEvent(tradeTx *TradeTx) Event {
 	return Event{
