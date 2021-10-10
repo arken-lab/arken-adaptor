@@ -40,26 +40,25 @@ If the chain the protocol is based on is not in the supported chain list, a chai
 ### Chain Adaptor Interface References
 
 ```golang
-func (ChainAdaptor) GetLogs(fromBlock, toBlock, logFilters) []Log
-
-func (ChainAdaptor) GetTransactions(fromBlock, toBlock, transactionFilters) []Transaction
-
-func (ChainAdaptor) QueryContract(contractQueryData) ContractResponse
-
-func (ChainAdaptor) GetLatestBlock() BlockNumber
+type ChainAdaptor interface {
+	GetLatestBlock() (BlockNumber, error)
+	GetLogs(fromBlock int64, toBlock int64, logFilters []LogFilter) ([]Log, error)
+	GetTransactions(fromBlock int64, toBlock int64, transactionFilters []TransactionFilter) ([]Transaction, error)
+	QueryContract(contractQueryData interface{}) (ContractResponse, error)
+}
 ```
 
 ## Protocol Adaptor
 In order to support new protocol, a protocol adaptor is required. There are different approaches to implement a protocol adaptor depending on how the protocol is implemented. We recommend you to look at the event types required by Arken Trading Platform and figure out how to get those information based on your protocol implementation.
 
 ### Log-based Events
-If the information in the events can be retrieved from logs, we can use log-based implementation of the protocol adaptor. The GetLogFilters and ProcessLog are required to be implemented. Also, GetLatestBlock and GetLogs are required in the Chain Adaptor implementation. The example of this type of event is Swap log in Uniswap V2 protocol.
+If the information in the events can be retrieved from logs, we can use log-based implementation of the protocol adaptor. The `GetLogFilters` and `ProcessLog` are required to be implemented. Also, `GetLatestBlock` and `GetLogs` are required in the Chain Adaptor implementation. The example of this type of event is Swap log in Uniswap V2 protocol.
 
 ### Transaction-based Events
-If the information in the events cannot be retrieved from logs, but can be retrieved from transactions, we can use transaction-based implementation of the protocol adaptor. The GetTransactionFilters and ProcessTransaction are required to be implemented. Also, GetLatestBlock and GetTransactions are required in the Chain Adaptor implementation.
+If the information in the events cannot be retrieved from logs, but can be retrieved from transactions, we can use transaction-based implementation of the protocol adaptor. The `GetTransactionFilters` and `ProcessTransaction` are required to be implemented. Also, `GetLatestBlock` and `GetTransactions` are required in the Chain Adaptor implementation.
 
 ### Contract-based Events
-If extracting information both from log and transaction is not possible, we have another method of extracting data, which is smart contract query in a polling manner. This type of data retrieval is not recommended and should be saved as last resort due to the drop in performance. The example of this type of event is getting token reserve values in Dodoswap liquidity pool. The GetPollingContracts and ProcessPollingContractResponse are required to be implemented. Also, GetLatestBlock and QueryContract are required in the Chain Adaptor implementation.
+If extracting information both from log and transaction is not possible, we have another method of extracting data, which is smart contract query in a polling manner. This type of data retrieval is not recommended and should be saved as last resort due to the drop in performance. The example of this type of event is getting token reserve values in Dodoswap liquidity pool. The `GetPollingContracts` and `ProcessPollingContractResponse` are required to be implemented. Also, `GetLatestBlock` and `QueryContract` are required in the Chain Adaptor implementation.
 
 ### Supported Protocol Adaptors
 Here are the list of supported protocol adaptors. If your protocol is already on the list, it means that Arken Trading Platform can instantly integrate your platform.
@@ -72,17 +71,14 @@ Here are the list of supported protocol adaptors. If your protocol is already on
 ### Protocol Adaptor Interface References
 
 ```golang
-func (ProtocolAdaptor) GetLogFilters() []LogFilter
-
-func (ProtocolAdaptor) GetTransactionFilters() []TransactionFilter
-
-func (ProtocolAdaptor) GetPollingContracts() []ContractQueryData
-
-func (ProtocolAdaptor) ProcessLog(log) []Event
-
-func (ProtocolAdaptor) ProcessPollingContractResponse(ContractResponse) []Event
-
-func (ProtocolAdaptor) ProcessTransaction(Transaction) []Event
+type ProtocolAdaptor interface {
+	GetLogFilters() ([]LogFilter, error)
+	GetTransactionFilters() ([]TransactionFilter, error)
+	GetPollingContracts() ([]ContractResponse, error)
+	ProcessLog(log Log) ([]Event, error)
+	ProcessPollingContractResponse(ContractResponse) ([]Event, error)
+	ProcessTransaction(Transaction) ([]Event, error)
+}
 ```
 ### Feature Integration Matrix
 There are several features on Arken Trading Platform. Protocol Adaptor is not required to support all features. Here is the list of events that is required to be implemented in each feature.
@@ -97,38 +93,37 @@ There are several features on Arken Trading Platform. Protocol Adaptor is not re
 ## Additional Interface References
 ```golang
 type Event struct {
-  Type enums (TradeTx | PoolCreated | PoolUpdated | PoolDeleted)
-  Payload interface{}
+	Type    EventType
+	payload interface{}
 }
 
-func (Event) GetTradeTx() *TradeTx // For type TradeTx
+func (e *Event) GetTradeTx() (*TradeTx, error) // For type TradeTx
 
 type TradeTx struct {
-  Token Token
-  TxHash string
-  LogIndex int32
-  Block int64
-  LPAddress ContractAddress
-  AmountBase float64
-  AmountUSD float64
-  PriceBaseUSD float64
-  Side TransactionSide
-  Timestamp int64
+	Token        TradeTxToken
+	TxHash       string
+	LogIndex     int64
+	Block        int64
+	LpAddress    string
+	AmountBase   float64
+	AmountUsd    float64
+	PriceBaseUsd float64
+	Side         TradeTxSide
+	Timestamp    int64
+	IsRemoved    bool
+	IsHistorical bool
 }
 
-func (Event) GetPool() Pool // For type = PoolCreated, PoolUpdated, PoolDeleted
+func (e *Event) GetPool() (*Pool, error) // For type = PoolCreated, PoolUpdated, PoolDeleted
 
-func (Pool) GetChain() ChainType
-func (Pool) GetAddress() ContractAddress
-func (Pool) GetTokens() []Tokens
-func (Pool) GetExchangeRate(token, int256 amount) []Tokens
-func (Pool) GetMidPrice(quoteToken) decimal
-func (Pool) GetReserve(token) int256
-// Pool struct must be marshallable in JSON format
+type Pool interface {
+	GetChain() string
+	GetAddress() string
+	GetTokens() []Token
+	GetExchangeRate(token Token, amount uint256.Int) uint256.Int
+	GetMidPrice(quoteToken Token) (float64, error)
+	GetReserve(token Token) (uint256.Int, error)
+}
+// Struct from Pool interface must be marshallable in JSON format
 
-func (Token) GetChain() ChainType
-func (Token) GetAddress() ContractAddress
-func (Token) GetDecimalAmount(amount) decimal
-func (Token) GetDecimal() int8
-// Token struct must be marshallable in JSON format
 ```
