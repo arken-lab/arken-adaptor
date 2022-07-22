@@ -1,10 +1,12 @@
 # 🔌 Arken Universal Adaptor
-
+![Logo](/images/adaptor-logo.png?raw=true)
 > _Note: This repository is the work during “SCB 10X DeFi Launchpad Hackathon”. The design of Arken Universal Adaptor is not yet finalized and subject to change._
 
 Arken Universal Adaptor is a standardized interface written in Golang. The main purpose is for blockchain protocol developers to integrate their protocol with Arken to enable real-time charts and Arken DEX aggregator integration with ease.
 
 There are mainly 2 interfaces in Arken Universal Adaptor design, **Chain Adaptor** and **Protocol Adaptor**. Chain Adaptor is an abstraction layer to unify interactions between chains and protocols. Protocol Adaptor is a protocol-specific code to get information from the transaction. E.g. transaction’s trading price, liquidity pool reserves, current exchange rates, etc.
+
+![Architecture](/images/architecture.png?raw=true)
 
 ## Interface Terminology
 Throughout the documentation, you might find many terms that we use. Here is the compiled terms.
